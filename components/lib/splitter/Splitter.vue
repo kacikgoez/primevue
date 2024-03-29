@@ -2,20 +2,13 @@
     <div :class="cx('root')" :style="sx('root')" :data-p-resizing="false" v-bind="ptmi('root', getPTOptions)">
         <template v-for="(panel, i) of panels" :key="i">
             <component :is="panel" tabindex="-1"></component>
-            <div
-                v-if="i !== panels.length - 1"
-                ref="gutter"
-                :class="cx('gutter')"
-                role="separator"
-                tabindex="-1"
-                @mousedown="onGutterMouseDown($event, i)"
-                @touchstart="onGutterTouchStart($event, i)"
-                @touchmove="onGutterTouchMove($event, i)"
-                @touchend="onGutterTouchEnd($event, i)"
-                :data-p-gutter-resizing="false"
-                v-bind="ptm('gutter')"
-            >
-                <div :class="cx('gutterHandler')" tabindex="0" :style="[gutterStyle]" :aria-orientation="layout" :aria-valuenow="prevSize" @keyup="onGutterKeyUp" @keydown="onGutterKeyDown($event, i)" v-bind="ptm('gutterHandler')"></div>
+            <div v-if="i !== panels.length - 1" ref="gutter" :class="cx('gutter')" role="separator" tabindex="-1"
+                @mousedown="onGutterMouseDown($event, i)" @touchstart="onGutterTouchStart($event, i)"
+                @touchmove="onGutterTouchMove($event, i)" @touchend="onGutterTouchEnd($event, i)"
+                :data-p-gutter-resizing="false" v-bind="ptm('gutter')">
+                <div :class="cx('gutterHandler')" tabindex="0" :style="[gutterStyle]" :aria-orientation="layout"
+                    :aria-valuenow="prevSize" @keyup="onGutterKeyUp" @keydown="onGutterKeyDown($event, i)"
+                    v-bind="ptm('gutterHandler')"></div>
             </div>
         </template>
     </div>
@@ -42,6 +35,7 @@ export default {
     nextPanelElement: null,
     nextPanelSize: null,
     prevPanelSize: null,
+    panelCount: null,
     panelSizes: null,
     prevPanelIndex: null,
     timer: null,
@@ -73,6 +67,8 @@ export default {
                 this.panelSizes = _panelSizes;
                 this.prevSize = parseFloat(_panelSizes[0]).toFixed(4);
             }
+
+            this.panelCount = this.panels.length - 1;
         }
     },
     beforeUnmount() {
@@ -96,11 +92,11 @@ export default {
             this.nextPanelElement = this.gutterElement.nextElementSibling;
 
             if (isKeyDown) {
-                this.prevPanelSize = this.horizontal ? DomHandler.getOuterWidth(this.prevPanelElement, true) : DomHandler.getOuterHeight(this.prevPanelElement, true);
-                this.nextPanelSize = this.horizontal ? DomHandler.getOuterWidth(this.nextPanelElement, true) : DomHandler.getOuterHeight(this.nextPanelElement, true);
+                this.prevPanelSize = (this.horizontal ? DomHandler.getOuterWidth(this.prevPanelElement, true) : DomHandler.getOuterHeight(this.prevPanelElement, true)) + this.panelCount * this.gutterSize;
+                this.nextPanelSize = (this.horizontal ? DomHandler.getOuterWidth(this.nextPanelElement, true) : DomHandler.getOuterHeight(this.nextPanelElement, true)) + this.panelCount * this.gutterSize;
             } else {
-                this.prevPanelSize = (100 * (this.horizontal ? DomHandler.getOuterWidth(this.prevPanelElement, true) : DomHandler.getOuterHeight(this.prevPanelElement, true))) / this.size;
-                this.nextPanelSize = (100 * (this.horizontal ? DomHandler.getOuterWidth(this.nextPanelElement, true) : DomHandler.getOuterHeight(this.nextPanelElement, true))) / this.size;
+                this.prevPanelSize = (100 * ((this.horizontal ? DomHandler.getOuterWidth(this.prevPanelElement, true) : DomHandler.getOuterHeight(this.prevPanelElement, true))) + this.panelCount * this.gutterSize) / this.size;
+                this.nextPanelSize = (100 * ((this.horizontal ? DomHandler.getOuterWidth(this.nextPanelElement, true) : DomHandler.getOuterHeight(this.nextPanelElement, true))) + this.panelCount * this.gutterSize) / this.size;
             }
 
             this.prevPanelIndex = index;
@@ -128,8 +124,8 @@ export default {
             }
 
             if (this.validateResize(newPrevPanelSize, newNextPanelSize)) {
-                this.prevPanelElement.style.flexBasis = 'calc(' + newPrevPanelSize + '% - ' + (this.panels.length - 1) * this.gutterSize + 'px)';
-                this.nextPanelElement.style.flexBasis = 'calc(' + newNextPanelSize + '% - ' + (this.panels.length - 1) * this.gutterSize + 'px)';
+                this.prevPanelElement.style.flexBasis = 'calc(' + newPrevPanelSize + '% - ' + this.panelCount * this.gutterSize + 'px)';
+                this.nextPanelElement.style.flexBasis = 'calc(' + newNextPanelSize + '% - ' + this.panelCount * this.gutterSize + 'px)';
                 this.panelSizes[this.prevPanelIndex] = newPrevPanelSize;
                 this.panelSizes[this.prevPanelIndex + 1] = newNextPanelSize;
                 this.prevSize = parseFloat(newPrevPanelSize).toFixed(4);
@@ -339,7 +335,7 @@ export default {
                 let children = [...this.$el.children].filter((child) => child.getAttribute('data-pc-name') === 'splitterpanel');
 
                 children.forEach((child, i) => {
-                    child.style.flexBasis = 'calc(' + this.panelSizes[i] + '% - ' + (this.panels.length - 1) * this.gutterSize + 'px)';
+                    child.style.flexBasis = 'calc(' + this.panelSizes[i] + '% - ' + this.panelCount * this.gutterSize + 'px)';
                 });
 
                 return true;
