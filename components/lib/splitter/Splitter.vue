@@ -124,8 +124,8 @@ export default {
             }
 
             if (this.validateResize(newPrevPanelSize, newNextPanelSize)) {
-                this.prevPanelElement.style.flexBasis = 'calc(' + newPrevPanelSize + '% - ' + this.panelCount * this.gutterSize + 'px)';
-                this.nextPanelElement.style.flexBasis = 'calc(' + newNextPanelSize + '% - ' + this.panelCount * this.gutterSize + 'px)';
+                this.prevPanelElement.style.flexBasis = 'calc(' + newPrevPanelSize + '% - ' + this.panelCount * this.gutterSize / (this.panelCount - 1) + 'px)';
+                this.nextPanelElement.style.flexBasis = 'calc(' + newNextPanelSize + '% - ' + this.panelCount * this.gutterSize / (this.panelCount - 1) + 'px)';
                 this.panelSizes[this.prevPanelIndex] = newPrevPanelSize;
                 this.panelSizes[this.prevPanelIndex + 1] = newNextPanelSize;
                 this.prevSize = parseFloat(newPrevPanelSize).toFixed(4);
